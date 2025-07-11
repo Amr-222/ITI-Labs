@@ -4,43 +4,30 @@ using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace ITI
 {
+
     internal class Program
     {
+
+
+
+        // Util
+        static bool isNegativeOrZero(double num)
+        {
+            return (isNegative(num) || num == 0);
+        }
 
         static bool isNegative(double num)
         {
             return (num < 0);
-
         }
 
         static bool isEven(int num)
         {
             return (num % 2 == 0);
-        }
-
-
-        static bool isSquare(double length, double width)
-        {
-            if (isNegative(length) || isNegative(width) || length == 0)
-                return false;
-            else
-                return (length == width);
-
-        }
-
-        static void MultiplicationTable()
-        {
-            for (int i = 1; i <= 12; i++)
-            {
-                for (int j = 1; j <= 12; j++)
-                {
-                    Console.WriteLine($"{i} * {j} = {i * j}");
-
-                }
-            }
         }
 
         static bool HasDigit(string text)
@@ -58,6 +45,36 @@ namespace ITI
             }
 
             return digit;
+        }
+
+        static bool InRange(double num, double from, double to)
+        {
+            return (num >= from && num <= to);
+        }
+
+
+
+        // Lab 1
+        static bool isSquare(double length, double width)
+        {
+            if (isNegative(length) || isNegative(width) || length == 0)
+                return false;
+            else
+                return (length == width);
+
+        }
+
+        // Lab 2
+        static void MultiplicationTable()
+        {
+            for (int i = 1; i <= 12; i++)
+            {
+                for (int j = 1; j <= 12; j++)
+                {
+                    Console.WriteLine($"{i} * {j} = {i * j}");
+
+                }
+            }
         }
 
         static void GetUserData()
@@ -118,6 +135,8 @@ namespace ITI
             } while (flag);
 
 
+
+
             //Degrees
 
             int size;
@@ -157,6 +176,362 @@ The Min Degree: {min}
 
         }
 
+        // Lab3
+
+
+        static Employee[] Employees = new Employee[200];
+        static int CountEmp = 0;
+
+        static Employee CreateEmployee(int ID)
+        {
+
+            Employee e = new Employee();
+
+            string name, city;
+            double salary;
+
+
+            while (true)
+            {
+
+
+
+                Console.WriteLine("Enter Your Name: ");
+                name = Console.ReadLine();
+
+                if (HasDigit(name))
+                {
+                    Console.WriteLine("Invalid name!");
+                    continue;
+                }
+
+                Console.WriteLine("Enter Your City: ");
+                city = Console.ReadLine();
+
+                if (HasDigit(city))
+                {
+                    Console.WriteLine("Invalid city!");
+                    continue;
+                }
+
+                Console.WriteLine("Enter Your Salary: ");
+                salary = double.Parse(Console.ReadLine());
+
+                if (isNegativeOrZero(salary))
+                {
+                    Console.WriteLine("Invalid salary!");
+                    continue;
+
+                }
+
+                break;
+            }
+            e.SetID(ID);
+            e.SetName(name);
+            e.SetCity(city);
+            e.SetSalary(salary);
+            e.SetHiringDate(DateTime.Now);
+
+            return e;
+
+        }
+
+        static void AddEmployee()
+        {
+            Employees[CountEmp] = CreateEmployee(CountEmp + 1);
+            CountEmp++;
+        }
+
+        static void PrintHead(string text)
+        {
+            Console.WriteLine($@"
+              ==========================================================================
+
+                                             {text}
+
+              ==========================================================================
+");
+
+        }
+
+        static void PrintEmployee(Employee e)
+        {
+            if (e != null)
+            {
+                Console.WriteLine($@"
+    {e.getID()}     |   {e.getName()}       |     {e.getSalary()}    |   {e.getCity()}  |   {e.getHiringDate()}
+
+   _______________________________________________________________________
+");
+
+            }else
+                Console.WriteLine("No Employee Found .");
+
+        }
+
+        static void PrintAllEmployees()
+        {
+            PrintHead("Employees");
+
+            Console.WriteLine($@"
+
+    ID    |   Name     |    Salary    |   City   |   Hirirng Date
+   _______________________________________________________________________
+");
+
+
+           for(int i = 0; i < CountEmp; i++) {
+                PrintEmployee(Employees[i]);
+            }
+
+        }
+
+        static Employee GetEmployeeByID()
+        {
+            int id;
+
+            while (true)
+            {
+
+                Console.WriteLine("Enter The ID: ");
+                id = int.Parse(Console.ReadLine());
+
+                if (isNegativeOrZero(id))
+                {
+                    Console.WriteLine("Invalid Number!");
+                    continue;
+
+                }
+                break;
+            }
+
+
+            foreach (Employee e in Employees)
+            {
+                if (e.getID() == id)
+                    return e;
+            }
+            return null;
+        }
+
+        static void ReturntoMain()
+        {
+            Console.WriteLine("Press any key to return to Main Menu ... ");
+            Console.ReadKey();
+            Console.Clear();
+
+            MainMenu();
+        }
+
+
+        static string EditName()
+        {
+            string name;
+            while (true)
+            {
+
+
+
+                Console.WriteLine("Enter Your Name: ");
+                name = Console.ReadLine();
+
+                if (HasDigit(name))
+                {
+                    Console.WriteLine("Invalid name!");
+                    continue;
+                }
+                break;
+            }
+            return name;
+        }
+
+        static double EditSalary()
+        {
+            double salary;
+            while (true)
+            {
+                Console.WriteLine("Enter Your Salary: ");
+                salary = double.Parse(Console.ReadLine());
+
+                if (isNegativeOrZero(salary))
+                {
+                    Console.WriteLine("Invalid salary!");
+                    continue;
+
+                }
+
+                break;
+            }
+            return salary; 
+        }
+
+        static string EditCity()
+        {
+            string City;
+            while (true)
+            {
+
+
+
+                Console.WriteLine("Enter Your City: ");
+                City = Console.ReadLine();
+
+                if (HasDigit(City))
+                {
+                    Console.WriteLine("Invalid City!");
+                    continue;
+                }
+                break;
+            }
+            return City;
+
+        }
+        static void EditAll()
+        {
+            EditName();
+            EditSalary();
+            EditCity();
+        }
+
+        static void UpdateModerator(ref Employee e)
+        {
+
+            int choice;
+
+            PrintHead("Update Choices");
+
+            Console.WriteLine($"{1} - Update Name .");
+            Console.WriteLine($"{2} - Update Salary .");
+            Console.WriteLine($"{3} - Update City .");
+            Console.WriteLine($"{4} - Update ALL .");
+
+
+            while (true)
+            {
+                choice = int.Parse(Console.ReadLine());
+
+                if (!InRange(choice, 1, 4))
+                {
+                    Console.WriteLine("Invalid Value ! \nPlease Enter again . \n");
+                }
+                break;
+            }
+
+
+            switch (choice)
+            {
+                case 1:
+                    e.SetName(EditName()) ;
+                    break;
+
+                case 2:
+                    e.SetSalary(EditSalary());
+
+                    break;
+
+                case 3:
+                    e.SetCity( EditCity());
+
+                    break;
+
+                case 4:
+                    e.SetName(EditName());
+                    e.SetSalary(EditSalary());
+                    e.SetCity(EditCity());
+                    break;
+
+                default:
+
+                    Console.WriteLine("INVALID !");
+                    break;
+
+
+
+
+
+
+            }
+
+
+
+
+        }
+
+
+        static void MainManager(int choice)
+        {
+            switch (choice)
+            {
+                case 1:
+                    Console.Clear();
+                    AddEmployee();
+                    ReturntoMain();
+                    break;
+
+                case 2:
+                    Console.Clear();
+                    Employee e = GetEmployeeByID();
+                    if (e != null)
+                        UpdateModerator(ref e);
+                    ReturntoMain();
+                    break;
+
+                case 3:
+                    Console.Clear();
+                    PrintEmployee(GetEmployeeByID());
+                    ReturntoMain();
+                    break;
+
+                case 4:
+                    Console.Clear();
+                    PrintAllEmployees();
+                    ReturntoMain();
+
+                    break;
+
+                default:
+
+                    Console.WriteLine("INVALID !");
+                    break;
+
+
+
+
+
+
+            }
+        }
+        static void MainMenu()
+        {
+
+            int choice;
+
+            PrintHead("Employees System");
+
+            Console.WriteLine($"{1} - Add Employee .");
+            Console.WriteLine($"{2} - Update Employee .");
+            Console.WriteLine($"{3} - Get Employee By ID .");
+            Console.WriteLine($"{4} - Get All Employees .");
+
+
+            while (true)
+            {
+                choice = int.Parse(Console.ReadLine());
+
+                if (!InRange(choice, 1, 4))
+                {
+                    Console.WriteLine("Invalid Value ! \nPlease Enter again . \n");
+                }
+                break;
+            }
+
+
+            MainManager(choice);
+
+        }
+
+
+
 
 
 
@@ -168,6 +543,7 @@ The Min Degree: {min}
         static void Main(string[] args)
         {
 
+            #region Lab1
 
             //Console.WriteLine("1\\ " + isNegative(-5));
             //Console.WriteLine("2\\ " + isNegative(10));
@@ -179,15 +555,29 @@ The Min Degree: {min}
             //Console.WriteLine("6\\ " + isSquare(-2, -2));
             //Console.WriteLine("7\\ " + isSquare(4, 6));
             //Console.WriteLine("8\\ " + isSquare(0, 0));
+            #endregion
 
-  
+            #region Lab2
+            //MultiplicationTable();
+            //GetUserData();
+            #endregion
 
-            MultiplicationTable();
-            GetUserData();
+
+            #region Lab3
 
 
 
-      
+            MainMenu();
+
+         
+
+
+
+
+
+            #endregion
+
+
         }
     }
 }
