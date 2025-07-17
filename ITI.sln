@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ITI", "ITI\ITI.csproj", "{D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Company", "Company\Company.csproj", "{4345F477-120B-4210-86C4-73771EEA311E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataStructure", "DataStructure\DataStructure.csproj", "{8DC40EB7-71DD-476D-8FBC-DBFE7CF3358D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{4345F477-120B-4210-86C4-73771EEA311E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4345F477-120B-4210-86C4-73771EEA311E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4345F477-120B-4210-86C4-73771EEA311E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DC40EB7-71DD-476D-8FBC-DBFE7CF3358D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DC40EB7-71DD-476D-8FBC-DBFE7CF3358D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DC40EB7-71DD-476D-8FBC-DBFE7CF3358D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DC40EB7-71DD-476D-8FBC-DBFE7CF3358D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

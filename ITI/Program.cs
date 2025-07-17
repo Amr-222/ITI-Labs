@@ -1,12 +1,5 @@
 ﻿using Company;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
-using System.Linq;
-using System.Runtime.Intrinsics.Arm;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
+using DataStructure;
 
 namespace ITI
 {
@@ -1749,6 +1742,7 @@ Number of Employees: {dep.EmployeeIDs.Count()}
 
 
 
+
         static void Main(string[] args)
         {
 
@@ -1780,10 +1774,25 @@ Number of Employees: {dep.EmployeeIDs.Count()}
 
             #region Lab4
 
-            MainMenuCompany();
+            //   MainMenuCompany();
 
             #endregion
 
+            #region Lab5
+            DynamicArray<int> myArray = new DynamicArray<int>();
+            myArray.Add(10);
+            myArray.Add(20);
+            myArray.Add(30);
+            myArray.Add(40);
+            myArray.Add(50);
+
+            myArray.PrintAll();
+
+            Console.WriteLine($"Count: {myArray.Count}");
+
+            Console.WriteLine($"Average: {myArray.Average()}");
+
+            #endregion
         }
     }
 }
