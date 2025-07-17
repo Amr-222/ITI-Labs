@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Company;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.Linq;
+using System.Runtime.Intrinsics.Arm;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Company;
 
 namespace ITI
 {
@@ -180,10 +181,12 @@ The Min Degree: {min}
         // Lab3
 
 
-        static Company.Employee[] Employees = new Employee[200];
+        static Company.Employee[] Employees = new Employee[1];
         static int CountEmp = 0;
 
-        static Employee CreateEmployee(int ID)
+  /*     Turned Abstract
+        
+       static Employee CreateEmployee(int ID)
         {
 
             Employee e = new Employee();
@@ -236,12 +239,13 @@ The Min Degree: {min}
             return e;
 
         }
-
+ 
         static void AddEmployee()
         {
             Employees[CountEmp] = CreateEmployee(CountEmp + 1);
             CountEmp++;
         }
+ */
 
         static void PrintHead(string text)
         {
@@ -334,12 +338,12 @@ The Min Degree: {min}
 
 
 
-                Console.WriteLine("Enter Your Name: ");
+                Console.WriteLine("Enter The Name: ");
                 name = Console.ReadLine();
 
                 if (HasDigit(name))
                 {
-                    Console.WriteLine("Invalid name!");
+                    Console.WriteLine("Invalid Name!");
                     continue;
                 }
                 break;
@@ -387,13 +391,6 @@ The Min Degree: {min}
             }
             return City;
 
-        }
-
-        static void EditAll()
-        {
-            EditName();
-            EditSalary();
-            EditCity();
         }
 
         static void UpdateModerator(ref Employee e)
@@ -466,7 +463,7 @@ The Min Degree: {min}
             {
                 case 1:
                     Console.Clear();
-                    AddEmployee();
+               //     AddEmployee();   Abstract
                     ReturntoMain();
                     break;
 
@@ -541,6 +538,12 @@ The Min Degree: {min}
         static List<Department> Departments = new List<Department>();
         static List<Project> Projects = new List<Project>();
 
+        enum MainChoices { enDevelopers = 1, enDepartments, enProjects, enExit }
+        enum DevOperations { enAdd = 1, enUpdate, enDelete, enView, enAssigntoDep, enMain }
+        enum DepOperations { enAdd = 1, enUpdate, enDelete, enView, enAssign , enRemove, enMain }
+        enum ProjOperations { enAdd = 1, enUpdate, enDelete, enView, enAssign, enRemove, enMain }
+
+
         //Developer
         static Developer CreateDeveloper(int id)
         {
@@ -606,6 +609,36 @@ The Min Degree: {min}
             Developer.IncrementID();
         }
 
+        static Developer GetDeveloper()
+        {
+            
+                int id;
+
+                while (true)
+                {
+
+                    Console.WriteLine("Enter The Developer ID: ");
+                    id = int.Parse(Console.ReadLine());
+
+                    if (isNegativeOrZero(id))
+                    {
+                        Console.WriteLine("Invalid Number!");
+                        continue;
+
+                    }
+                    break;
+                }
+
+
+                foreach (Developer dev in Developers)
+                {
+                    if (dev.getID() == id)
+                        return dev;
+                }
+                return null;
+            
+        }
+
         static Developer GetDeveloper(int id)
         {
 
@@ -618,7 +651,7 @@ The Min Degree: {min}
 
         }
 
-        static void RemoveDeveloper()
+        static void DeletDeveloper()
         {
 
             int id;
@@ -643,6 +676,12 @@ The Min Degree: {min}
             {
                 Developers.Remove(d);
                 Console.WriteLine($"Developer {id} removed.");
+
+
+                for (int i = 0; i < Developers.Count; i++) // Re arrange the IDs from First
+                {
+                    Developers[i].SetID(i + 1);
+                }
             }
             else
             {
@@ -658,21 +697,26 @@ The Min Degree: {min}
                 Console.WriteLine($@"
 ID: {d.getID()}
 Name: {d.getName()}    
-Salary: {d.getSalary()}
 City: {d.getCity()} 
-Hiring Date: {d.getHiringDate()}
+Department ID: {d.DepartmentID}
 Max Projects Can Work On: {d.maxprojects}
+Currently Works On: {d.ProjectIDs.Count()}
+Salary: {d.getSalary()}
+Bonus: {d.getBonus()*100}%
+Total Salary: {d.GetTotalSalary()}
+Hiring Date: {d.getHiringDate()}
 ");
-                Console.WriteLine(@"
+                
+                    Console.WriteLine(@"
 
                                             Projects
 ");
+                if (d.ProjectIDs.Count() == 0)
+                    Console.WriteLine("No Projects Yet .\n");
 
-                PrintProjects(GetProjects(d.ProjectIDs));
+                PrintProjects(GetProjects(d.ProjectIDs), true);
 
-                Console.WriteLine($@"
-         _______________________________________________________________________
-");
+                
 
             }
             else
@@ -691,7 +735,69 @@ Max Projects Can Work On: {d.maxprojects}
 
         }
 
+        static int EditMaxNumber()
+        {
+            int max;
+            while (true)
+            {
+                Console.WriteLine("Enter The Max Number : ");
+                max = int.Parse(Console.ReadLine());
 
+                if (isNegativeOrZero(max))
+                {
+                    Console.WriteLine("Invalid Number!");
+                    continue;
+
+                }
+
+                break;
+            }
+            return max;
+        }
+
+        static void DeveloperToDepartment(bool assign) // if not assign it is remove
+        {
+            Developer dev2 = GetDeveloper();
+            Department dep2 = GetDepartment();
+            if (dev2 != null && dep2 != null)
+            {
+                if (assign)
+                {
+                    if (dep2.AssignEmployee(dev2.getID()))
+                        dev2.DepartmentID = dep2.ID;
+                }
+                else
+                {
+                    if (dep2.RemoveEmployee(dev2.getID()))
+                        dev2.DepartmentID = 0;
+                }
+            }
+            else
+                Console.WriteLine("Not Found");
+
+        }
+       
+        static void DeveloperToProject(bool assign)
+        {
+            Developer dev = GetDeveloper();
+            Project proj = GetProject();
+            if (dev != null && proj != null)
+            {
+                
+                if (assign)
+                {
+                    if (dev.AssignProject(proj.ID))
+                        proj.AssignEmployee(dev.getID());
+                }
+                else
+                {
+                    if (dev.RemoveProject(proj.ID))
+                        proj.RemoveEmployee(dev.getID());
+                }
+            }
+            else
+                Console.WriteLine("Not Found");
+        }
 
 
         //Project
@@ -701,16 +807,52 @@ Max Projects Can Work On: {d.maxprojects}
             PrintProjects(Projects);
         }
 
-        static void PrintProjects(List<Project> projects)
+        static void PrintProjects(List<Project> projects, bool dev = false)
         {
 
-  
-
-            foreach (Project p in projects)
+            if (dev)
             {
-                PrintProject(p);
+                foreach (Project p in projects)
+                {
+                    PrintProjectsOfDeveloper(p);
+                }
+
+            }
+            else
+            {
+                foreach (Project p in projects)
+                {
+                    PrintProject(p);
+                }
             }
 
+        }
+
+        static Project GetProject()
+        {
+            int id;
+
+            while (true)
+            {
+                Console.WriteLine("Enter Project ID: ");
+                id = int.Parse(Console.ReadLine());
+
+                if (isNegativeOrZero(id))
+                {
+                    Console.WriteLine("Invalid id!");
+                    continue;
+
+                }
+                break;
+            }
+
+            foreach (Project p in Projects)
+            {
+                if (p.ID == id)
+                    return p;
+            }
+
+            return null;
         }
 
         static Project GetProject(int id)
@@ -752,6 +894,17 @@ Number of Employees currently work on: {p.EmployeeIDs.Count()}
    _______________________________________________________________________
 ");
             }
+        }
+
+        static void PrintProjectsOfDeveloper(Project p)
+        {
+            Console.WriteLine($@"
+    _______________________________________________________________________
+
+Project ID: {p.ID}
+Project Name: {p.Name}    
+     _______________________________________________________________________
+");
         }
 
         static Project CreateProject(int id)
@@ -800,7 +953,7 @@ Number of Employees currently work on: {p.EmployeeIDs.Count()}
 
             return proj;
         }
-       
+
         static void AddProject()
         {
             Projects.Add(CreateProject(Project.GetNextID()));
@@ -808,13 +961,13 @@ Number of Employees currently work on: {p.EmployeeIDs.Count()}
 
         }
 
-        static void RemoveProject()
+        static void DeletProject()
         {
             int id;
 
             while (true)
             {
-                Console.WriteLine("Enter Your ID: ");
+                Console.WriteLine("Enter Project ID: ");
                 id = int.Parse(Console.ReadLine());
 
                 if (isNegativeOrZero(id))
@@ -826,12 +979,23 @@ Number of Employees currently work on: {p.EmployeeIDs.Count()}
                 break;
             }
 
-            Project p= GetProject(id);
+            Project p = GetProject(id);
 
             if (p != null)
             {
+                foreach(Developer dev in Developers)
+                {
+                    dev.RemoveProject(p.ID);
+                }
+
                 Projects.Remove(p);
                 Console.WriteLine($"Project {id} removed.");
+
+                for (int i = 0; i < Projects.Count; i++) // Re arrange the IDs from First
+                {
+                    Projects[i].ID = i + 1;
+                }
+
             }
             else
             {
@@ -850,7 +1014,7 @@ Number of Employees currently work on: {p.EmployeeIDs.Count()}
             Department dep = new Department();
 
             string name;
-            
+
 
 
             while (true)
@@ -871,7 +1035,7 @@ Number of Employees currently work on: {p.EmployeeIDs.Count()}
             }
             dep.ID = id;
             dep.Name = name;
-           
+
             return dep;
         }
 
@@ -888,11 +1052,12 @@ Number of Employees currently work on: {p.EmployeeIDs.Count()}
                 Console.WriteLine($@"
 Project ID: {dep.ID}
 Project Name: {dep.Name}    
+Manager ID: {dep.ManagerID}
 Number of Employees: {dep.EmployeeIDs.Count()}
    _______________________________________________________________________
 ");
             }
-        } 
+        }
 
         static void PrintDepartments()
         {
@@ -908,19 +1073,45 @@ Number of Employees: {dep.EmployeeIDs.Count()}
         {
             foreach (Department dep in Departments)
             {
-                if(dep.ID == id)
+                if (dep.ID == id)
                     return dep;
             }
             return null;
         }
- 
-        static void RemoveDepartmnet()
+
+        static Department GetDepartment()
         {
             int id;
 
             while (true)
             {
-                Console.WriteLine("Enter Your ID: ");
+                Console.WriteLine("Enter Department ID: ");
+                id = int.Parse(Console.ReadLine());
+
+                if (isNegativeOrZero(id))
+                {
+                    Console.WriteLine("Invalid id!");
+                    continue;
+
+                }
+                break;
+            }
+            foreach (Department dep in Departments)
+            {
+                if (dep.ID == id)
+                    return dep;
+            }
+            return null;
+
+        }
+
+        static void DeletDepartmnet()
+        {
+            int id;
+
+            while (true)
+            {
+                Console.WriteLine("Enter Department ID: ");
                 id = int.Parse(Console.ReadLine());
 
                 if (isNegativeOrZero(id))
@@ -936,8 +1127,25 @@ Number of Employees: {dep.EmployeeIDs.Count()}
 
             if (dep != null)
             {
+                foreach (Developer dev in Developers)
+                {
+
+                    if (dev.DepartmentID == dep.ID)
+                    {
+                        dev.DepartmentID = 0;
+                        dev.isManager = false;
+                    }
+
+                }
+
+
                 Departments.Remove(dep);
                 Console.WriteLine($"Department {id} removed.");
+
+                for (int i = 0; i < Departments.Count; i++) // Re arrange the IDs from First
+                {
+                    Departments[i].ID = i + 1;
+                }
             }
             else
             {
@@ -945,8 +1153,524 @@ Number of Employees: {dep.EmployeeIDs.Count()}
             }
         }
 
+        static int EditID()
+        {
+            int ID;
+            while (true)
+            {
+                Console.WriteLine("Enter The ID: ");
+                ID = int.Parse(Console.ReadLine());
+
+                if (isNegativeOrZero(ID))
+                {
+                    Console.WriteLine("Invalid Number!");
+                    continue;
+
+                }
+
+                break;
+            }
+            return ID;
+        }
+        
 
 
+
+        // Menus
+
+        static void SwitchDevelopers(DevOperations choice)
+        {
+            switch (choice)
+            {
+
+                case DevOperations.enAdd:
+                    Console.Clear();
+                    AddDeveloper();
+                    ReturntoDevelpersMenu();
+                    break;
+
+                case DevOperations.enUpdate:
+                    Console.Clear();
+                    Developer dev = GetDeveloper();
+                    if (dev != null)
+                        UpdateDevModerator(dev);
+                    else
+                        Console.WriteLine("Not Found");
+
+                    ReturntoDevelpersMenu();
+                    break;
+
+                case DevOperations.enDelete:
+                    Console.Clear();
+                    DeletDeveloper();
+                    ReturntoDevelpersMenu();
+                    break;
+                case DevOperations.enView:
+                    Console.Clear();
+                    PrintAllDevelopers();
+                    ReturntoDevelpersMenu();
+                    break;
+                case DevOperations.enAssigntoDep:
+                    Console.Clear();
+                    DeveloperToDepartment(true);
+                    ReturntoDevelpersMenu();
+                    break;
+                case DevOperations.enMain:
+                    Console.Clear();
+                    MainMenuCompany();
+                    break;
+                default:
+                    Console.WriteLine("Invalid!");
+                    break;
+
+            }
+
+        }
+
+
+        static void SwitchDepartments(DepOperations choice)
+        {
+
+
+            switch (choice)
+            {
+
+                case DepOperations.enAdd:
+                    Console.Clear();
+                    AddDepartment();
+                    ReturntoDepartmentsMenu();
+                    break;
+
+                case DepOperations.enUpdate:
+                    Console.Clear();
+                    Department dep = GetDepartment();
+                    if (dep != null)
+                        UpdateDepModerator(dep);
+                    else
+                        Console.WriteLine("Not Found");
+
+                    ReturntoDepartmentsMenu();
+                    break;
+
+                case DepOperations.enDelete:
+                    Console.Clear();
+                    DeletDepartmnet();
+                    ReturntoDepartmentsMenu();
+                    break;
+                case DepOperations.enView:
+                    Console.Clear();
+                    PrintDepartments();
+                    ReturntoDepartmentsMenu();
+                    break;
+                case DepOperations.enAssign:
+                    Console.Clear();
+                    DeveloperToDepartment(true);
+                    ReturntoDepartmentsMenu();
+                    break;
+                case DepOperations.enRemove:
+                    Console.Clear();
+                    DeveloperToDepartment(false);
+                    ReturntoDepartmentsMenu();
+                    break;
+                case DepOperations.enMain:
+                    Console.Clear();
+                    MainMenuCompany();
+                    break;
+                default:
+                    Console.WriteLine("Invalid!");
+                    break;
+
+            }
+        }
+
+
+        static void SwitchProject(ProjOperations choice)
+        {
+            switch (choice)
+            {
+
+                case ProjOperations.enAdd:
+                    Console.Clear();
+                    AddProject();
+                    ReturntoProjectsMenu();
+                    break;
+
+                case ProjOperations.enUpdate:
+                    Console.Clear();
+                    Project proj = GetProject();
+                    if (proj != null)
+                        UpdateProjectModerator(proj);
+                    else
+                        Console.WriteLine("Not Found");
+
+                    ReturntoProjectsMenu();
+                    break;
+
+                case ProjOperations.enDelete:
+                    Console.Clear();
+                    DeletProject();
+                    ReturntoProjectsMenu();
+                    break;
+                case ProjOperations.enView:
+                    Console.Clear();
+                    PrintAllProjects();
+                    ReturntoProjectsMenu();
+                    break;
+                case ProjOperations.enAssign:
+                    Console.Clear();
+                    DeveloperToProject(true);
+                    ReturntoProjectsMenu();
+                    break;
+                case ProjOperations.enRemove:
+                    Console.Clear();
+                    DeveloperToProject(false);
+                    ReturntoProjectsMenu();
+                    break;
+                case ProjOperations.enMain:
+                    Console.Clear();
+                    MainMenuCompany();
+                    break;
+                default:
+                    Console.WriteLine("Invalid!");
+                    break;
+
+            }
+        }
+
+
+
+        static void DevelopersMenu()
+        {
+            Console.Clear();
+
+            PrintHead("Developers");
+
+            Console.WriteLine(@"
+1 - Add Developer
+2 - Update Developer
+3 - Delete Developer
+4 - View All Developers
+5 - Assign to new Department
+6 - Return to Main Menu
+");
+
+            int num;
+
+            while (true)
+            {
+                num = int.Parse(Console.ReadLine());
+
+                if (!InRange(num, 1, 6))
+                {
+                    Console.WriteLine("Invalid Value ! \nPlease Enter again . \n");
+                }
+                break;
+            }
+
+
+            SwitchDevelopers((DevOperations)num);
+
+
+   
+
+        }
+
+        static void DepartmentsMenu()
+        {
+            Console.Clear();
+
+            PrintHead("Departments");
+
+            Console.WriteLine(@"
+1 - Add Department
+2 - Update Department
+3 - Delete Department
+4 - View All Departments
+5 - Assign Developer to Department
+6 - Remove Developer from Department
+7 - Return to Main Menu
+");
+
+
+
+            int num;
+
+            while (true)
+            {
+                num = int.Parse(Console.ReadLine());
+
+                if (!InRange(num, 1, 7))
+                {
+                    Console.WriteLine("Invalid Value ! \nPlease Enter again . \n");
+                }
+                break;
+            }
+
+
+            SwitchDepartments((DepOperations)num);
+
+
+
+        }
+
+        static void ProjectsMenu()
+        {
+            Console.Clear();
+
+            PrintHead("Projects");
+
+            Console.WriteLine(@"
+1 - Add Project
+2 - Update Project
+3 - Delete Project
+4 - View All Projects
+5 - Assign Developer to Project
+6 - Remove Developer from Project
+7 - Return to Main Menu
+");
+
+
+
+
+            int num;
+
+            while (true)
+            {
+                num = int.Parse(Console.ReadLine());
+
+                if (!InRange(num, 1, 7))
+                {
+                    Console.WriteLine("Invalid Value ! \nPlease Enter again . \n");
+                }
+                break;
+            }
+
+
+            SwitchProject((ProjOperations)num);
+
+        }
+
+
+
+
+
+        static void UpdateDevModerator(Developer dev)
+        {
+            int choice;
+
+            PrintHead("Update Choices");
+
+            Console.WriteLine($"{1} - Update Name .");
+            Console.WriteLine($"{2} - Update Salary .");
+            Console.WriteLine($"{3} - Update City .");
+            Console.WriteLine($"{4} - Update Max Projects Can Work .");
+            Console.WriteLine($"{5} - Update ALL .");
+            Console.WriteLine($"{6} - Return To Developers Menu .");
+
+
+            while (true)
+            {
+                choice = int.Parse(Console.ReadLine());
+
+                if (!InRange(choice, 1, 6))
+                {
+                    Console.WriteLine("Invalid Value ! \nPlease Enter again . \n");
+                }
+                break;
+            }
+
+
+            switch (choice)
+            {
+                case 1:
+                    dev.SetName(EditName());
+                    break;
+
+                case 2:
+                    dev.SetSalary(EditSalary());
+
+                    break;
+
+                case 3:
+                    dev.SetCity(EditCity());
+
+                    break;
+
+                case 4:
+                    dev.maxprojects = EditMaxNumber();
+                    break;
+                case 5:
+                     dev.SetName(EditName());
+                    dev.SetSalary(EditSalary());
+                    dev.SetCity(EditCity());
+                    dev.maxprojects = EditMaxNumber();
+                    break;
+                case 6:
+                    Console.Clear();
+                    DevelopersMenu();
+                    break;
+                default:
+
+                    Console.WriteLine("INVALID !");
+                    break;
+
+            }
+
+        }
+
+        static void UpdateDepModerator(Department dep)
+        {
+            int choice;
+
+            PrintHead("Update Choices");
+
+            Console.WriteLine($"{1} - Update Name .");
+            Console.WriteLine($"{2} - Update Manager ID .");
+            Console.WriteLine($"{3} - Update Both .");
+            Console.WriteLine($"{4} - Return To Departments Menu .");
+
+
+            while (true)
+            {
+                choice = int.Parse(Console.ReadLine());
+
+                if (!InRange(choice, 1, 4))
+                {
+                    Console.WriteLine("Invalid Value ! \nPlease Enter again . \n");
+                }
+                break;
+            }
+
+
+            switch (choice)
+            {
+                case 1:
+                    dep.Name = EditName();
+                    break;
+
+                case 2:
+                    Developer dev = GetDeveloper();
+                    if (dep.ManagerID == dev.getID())
+                        Console.WriteLine("Alredy Exist !");
+                    else if(dep.ManagerID==0)
+                    {
+                        dep.ManagerID = dev.getID();
+                        dep.AssignEmployee(dev.getID());
+                        dev.isManager= true;
+                        dev.DepartmentID = dep.ID;
+                    }
+                    else
+                    {
+                        Developer oldmanager = GetDeveloper(dep.ManagerID);
+                        oldmanager.isManager = false;
+
+                        dep.ManagerID = dev.getID();
+                        dev.isManager = true;
+                        dev.DepartmentID = dep.ID;
+                        dep.AssignEmployee(dev.getID());
+                    }
+
+                        break;
+
+                case 3:
+                    dep.Name = EditName();
+                    Developer dev2 = GetDeveloper();
+                    if (dep.ManagerID == dev2.getID())
+                        Console.WriteLine("Alredy Exist !");
+                    else
+                        dep.ManagerID = dev2.getID();
+
+                    break;
+                case 4:
+                    Console.Clear();
+                    DepartmentsMenu();
+                    break;
+                default:
+
+                    Console.WriteLine("INVALID !");
+                    break;
+
+            }
+        }
+
+        static void UpdateProjectModerator(Project proj)
+        {
+            int choice;
+
+            PrintHead("Update Choices");
+
+            Console.WriteLine($"{1} - Update Name .");
+            Console.WriteLine($"{2} - Update Max Number Of Employees .");
+            Console.WriteLine($"{3} - Update Both .");
+            Console.WriteLine($"{4} - Return To Projects Menu .");
+
+
+            while (true)
+            {
+                choice = int.Parse(Console.ReadLine());
+
+                if (!InRange(choice, 1, 4))
+                {
+                    Console.WriteLine("Invalid Value ! \nPlease Enter again . \n");
+                }
+                break;
+            }
+
+
+            switch (choice)
+            {
+                case 1:
+                    proj.Name = EditName();
+                    break;
+                case 2:
+                    proj.MaxNumberOfEmployees = EditMaxNumber();
+                    break;
+                case 3:
+                    proj.Name = EditName();
+                    proj.MaxNumberOfEmployees = EditMaxNumber();
+                    break;
+                case 4:
+                    Console.Clear();
+                    ProjectsMenu();
+                    break;
+                default:
+
+                    Console.WriteLine("INVALID !");
+                    break;
+
+            }
+        }
+
+
+
+
+
+        static void ReturntoDevelpersMenu()
+        {
+            Console.WriteLine("Press any key to return to Developers Menu ... ");
+            Console.ReadKey();
+            Console.Clear();
+
+            DevelopersMenu();
+        }
+
+        static void ReturntoDepartmentsMenu()
+        {
+            Console.WriteLine("Press any key to return to Departmnets Menu ... ");
+            Console.ReadKey();
+            Console.Clear();
+
+            DepartmentsMenu();
+        }
+
+        static void ReturntoProjectsMenu()
+        {
+            Console.WriteLine("Press any key to return to Projects Menu ... ");
+            Console.ReadKey();
+            Console.Clear();
+
+            ProjectsMenu();
+        }
 
 
         static void ReturntoMainMenuCompany()
@@ -958,80 +1682,27 @@ Number of Employees: {dep.EmployeeIDs.Count()}
             MainMenuCompany();
         }
 
-        static void MainMenuCompany()
+        static void SwitchMain(MainChoices choice)
         {
-            PrintHead("Main Menu");
-            Console.WriteLine(@"
-1 - Add Developer
-2 - Add Department
-3 - Add Project
-4 - View All Developers
-5 - View All Departments
-6 - View All Projects
-7 - Delete Developer
-8 - Delete Department
-9 - Delete Project
-0 - Exit
-");
-
-            int choice = int.Parse(Console.ReadLine());
             Console.Clear();
+
+
             switch (choice)
             {
-                case 1:
+                case MainChoices.enDevelopers:
                     Console.Clear();
-                    AddDeveloper();
-                    ReturntoMainMenuCompany();
+                    DevelopersMenu();
                     break;
-                case 2:
+                case MainChoices.enDepartments:
                     Console.Clear();
-                     AddDepartment();
-                    ReturntoMainMenuCompany();
+                    DepartmentsMenu();
 
                     break;
-                case 3:
+                case MainChoices.enProjects:
                     Console.Clear();
-                     AddProject();
-                    ReturntoMainMenuCompany();
-
+                    ProjectsMenu();
                     break;
-                case 4:
-                    Console.Clear();
-                     PrintAllDevelopers();
-                    ReturntoMainMenuCompany();
-
-                    break;
-                case 5:
-                    Console.Clear();
-                    PrintDepartments();
-                    ReturntoMainMenuCompany();
-
-                    break;
-                case 6:
-                    Console.Clear();
-                    PrintAllProjects();
-                    ReturntoMainMenuCompany();
-
-                    break;
-                case 7:
-                    Console.Clear();
-                    RemoveDeveloper();
-                    ReturntoMainMenuCompany();
-
-                    break;
-                case 8:
-                    Console.Clear();
-                    RemoveDepartmnet();
-                    ReturntoMainMenuCompany();
-
-                    break;
-                case 9:
-                    Console.Clear();
-                    RemoveProject();
-                    ReturntoMainMenuCompany();
-
-                    break;
-                case 0:
+                case MainChoices.enExit:
                     Environment.Exit(0);
                     break;
                 default:
@@ -1039,8 +1710,40 @@ Number of Employees: {dep.EmployeeIDs.Count()}
                     break;
             }
 
-            ReturntoMain();
+
         }
+
+        static void MainMenuCompany()
+        {
+
+
+            PrintHead("Main Menu");
+
+            Console.WriteLine(@"
+1 - Developers
+2 - Departments
+3 - Projects
+4 - Exit
+");
+
+            int num;
+
+            while (true)
+            {
+                num = int.Parse(Console.ReadLine());
+
+                if (!InRange(num, 1, 4))
+                {
+                    Console.WriteLine("Invalid Value ! \nPlease Enter again . \n");
+                }
+                break;
+            }
+  
+
+            SwitchMain((MainChoices)num);
+
+        }
+
 
 
 
@@ -1078,7 +1781,6 @@ Number of Employees: {dep.EmployeeIDs.Count()}
             #region Lab4
 
             MainMenuCompany();
-
 
             #endregion
 

@@ -1,6 +1,13 @@
 ﻿namespace Company
 {
-    public class Employee
+    interface IBonus
+    {
+       public double getBonus();
+    }
+
+
+
+    public abstract class Employee 
     {
 
         int ID;
@@ -8,6 +15,7 @@
         double Salary;
         DateTime HiringDate;
         string City;
+       public bool isManager { set; get; } = false;
 
         public Employee()
         {
@@ -73,17 +81,18 @@
         }
 
 
+      public  abstract double GetTotalSalary();
+        
     }
 
 
 
-
-    public class Developer : Employee
+    public class Developer : Employee, IBonus
     {
-       
+
         public List<int> ProjectIDs = new List<int>();
-        public int maxprojects { get; } = 5;
-        Department department;
+        public int maxprojects { get; set; } = 5;
+       public int DepartmentID {  get; set; }
 
         static int NextID = 1;
 
@@ -102,51 +111,63 @@
         }
 
 
-        public Developer(int _ID, string _Name, double _Salary, string _City,  int maxprojects = 5) : base(_ID, _Name, _Salary, _City)
+        public Developer(int _ID, string _Name, double _Salary, string _City, int maxprojects = 5) : base(_ID, _Name, _Salary, _City)
         {
             this.maxprojects = maxprojects;
         }
-        
 
 
-      
-
-        public void SetDepartment(Department d)
-        {
-              department = d;
-        }
 
 
-        public void AssignProject(int projectId)
+
+     
+
+        public bool AssignProject(int projectId)
         {
             if (ProjectIDs.Contains(projectId))
             {
-                Console.WriteLine("Project already exist.");
+                //  Console.WriteLine("Project already exist.");
+                return false;
 
             }
             else if (ProjectIDs.Count < maxprojects)
             {
                 ProjectIDs.Add(projectId);
+                return true;
             }
             else
             {
                 Console.WriteLine("Developer has max projects.");
+                return false;
+
             }
         }
 
-        public void RemoveProject(int projectId)
+        public bool RemoveProject(int projectId)
         {
 
             if (ProjectIDs.Contains(projectId))
             {
                 ProjectIDs.Remove(projectId);
-                Console.WriteLine($"Project {projectId} removed.");
+                //Console.WriteLine($"Project {projectId} removed.");
+                return true;
             }
             else
             {
-                Console.WriteLine($"Project {projectId} not found in this list.");
+                //Console.WriteLine($"Project {projectId} not found in this list.");
+                return false;
             }
         }
+
+
+
+        public double getBonus() => isManager ? 0.5 : 0.3;        
+
+        public override double GetTotalSalary()
+        {
+            return (getBonus() * getSalary() + getSalary());
+        }
+
 
 
     }
@@ -179,6 +200,7 @@
         static public int GetNextID()
         {
             return NextID;
+
         }
 
         static public void IncrementID()
@@ -186,7 +208,7 @@
             NextID++;
         }
 
-        public void AddEmployee(int empId)
+        public void AssignEmployee(int empId)
         {
             if (EmployeeIDs.Contains(empId))
             {
@@ -202,6 +224,7 @@
             {
                 Console.WriteLine("Project has max Emplyees.");
             }
+           
         }
 
         public void RemoveEmployee(int empId)
@@ -230,11 +253,12 @@
 
         public List<int> EmployeeIDs = new List<int>();
 
+        public int ManagerID { get; set; } = 0;
 
 
         static int NextID = 1;
 
-       static public int GetNextID()
+        static public int GetNextID()
         {
             return NextID;
         }
@@ -246,37 +270,43 @@
 
 
 
-        public void AddEmployee(int empId)
+        public bool AssignEmployee(int empId)
         {
-            
+
 
             if (!EmployeeIDs.Contains(empId))
             {
                 EmployeeIDs.Add(empId);
                 Console.WriteLine($"Employee {empId} Added Successfuly.");
+                return true;
             }
             else
             {
                 Console.WriteLine($"Employee {empId} already exist.");
+                return false;
             }
         }
 
-        public void RemoveEmployee(int empId)
+        public bool RemoveEmployee(int empId)
         {
             if (EmployeeIDs.Contains(empId))
             {
                 EmployeeIDs.Remove(empId);
                 Console.WriteLine($"Employee {empId} removed Successfully.");
+                return true;
             }
             else
             {
                 Console.WriteLine($"Employee {empId} not found in this list.");
+                return false ;
             }
         }
+
+
+      
     }
-
-
-
 }
+
+
 
 
