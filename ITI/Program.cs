@@ -532,7 +532,7 @@ The Min Degree: {min}
 
 
 
-        //  Lab 4
+        //  Lab 4 & 5 
 
         static List<Developer> Developers = new List<Developer>();
         static List<Department> Departments = new List<Department>();
